@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Home MQTT Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 MQTT Smart Home</h1>
+        <div id="status">Trạng thái: Đang kết nối...</div>
+        
+        <div class="grid-layout">
+            <div class="card" id="temp-card">
+                <h3>NHIỆT ĐỘ</h3>
+                <div class="value"><span id="temp-value">--</span>°C</div>
+            </div>
+            <div class="card">
+                <h3>ĐỘ ẨM</h3>
+                <div class="value"><span id="humi-value">--</span>%</div>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <div class="card">
+                <h3>Đèn Trần</h3>
+                <button class="btn btn-on" onclick="publishCmd('BẬT')">BẬT</button>
+                <button class="btn btn-off" onclick="publishCmd('TẮT')">TẮT</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
