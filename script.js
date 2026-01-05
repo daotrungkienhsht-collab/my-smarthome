@@ -1,57 +1,67 @@
-// 1. Cấu hình MQTT (Dùng cổng 8084 cho GitHub Pages)
+// 1. Cấu hình kết nối
 const MQTT_BROKER = "broker.emqx.io";
-const MQTT_PORT = 8084; 
+const MQTT_PORT = 8084; // Cổng WSS cho HTTPS
+const CLIENT_ID = "web_user_" + Math.random().toString(16).substr(2, 5);
 
-// 2. Tạo Client ID ngẫu nhiên để tránh xung đột kết nối
-// Mỗi người truy cập sẽ có một mã định danh riêng ví dụ: web_client_a1b2c3d4
-const CLIENT_ID = "web_client_" + Math.random().toString(16).substring(2, 10);
-
+// Khởi tạo client
 const client = new Paho.MQTT.Client(MQTT_BROKER, MQTT_PORT, CLIENT_ID);
 
-// 3. Thiết lập các hàm xử lý sự kiện
+// 2. Cấu hình các hàm phản hồi
 client.onConnectionLost = (responseObject) => {
     console.log("Mất kết nối: " + responseObject.errorMessage);
-    document.getElementById("status").innerText = "Mất kết nối! Đang thử lại...";
-    document.getElementById("status").style.color = "red";
+    const statusEl = document.getElementById("status");
+    statusEl.innerText = "Mất kết nối! Đang thử lại...";
+    statusEl.className = "status-disconnected";
 };
 
 client.onMessageArrived = (message) => {
-    console.log("Nhận dữ liệu từ Topic [" + message.destinationName + "]: " + message.payloadString);
+    console.log("Topic: " + message.destinationName + " | Data: " + message.payloadString);
     
-    // Cập nhật giao diện dựa trên Topic nhận được
     if (message.destinationName === "smart_home/temp") {
         document.getElementById("temp-value").innerText = message.payloadString;
-        updateCardColor("temp-card", parseFloat(message.payloadString));
     } else if (message.destinationName === "smart_home/humi") {
         document.getElementById("humi-value").innerText = message.payloadString;
     }
 };
 
-// 4. Kết nối tới Broker
+// 3. Tiến hành kết nối
 const connectOptions = {
     onSuccess: onConnect,
     onFailure: onFail,
-    useSSL: true,     // Bắt buộc phải có khi dùng HTTPS/GitHub Pages
-    timeout: 5,       // Thời gian chờ kết nối tối đa 5 giây
+    useSSL: true, // Bắt buộc true khi chạy trên GitHub Pages
+    timeout: 3,
     keepAliveInterval: 30
 };
 
+console.log("Đang khởi tạo kết nối MQTT...");
 client.connect(connectOptions);
 
 function onConnect() {
-    console.log("Kết nối thành công với ID: " + CLIENT_ID);
-    document.getElementById("status").innerText = "Trạng thái: Đã kết nối (ID: " + CLIENT_ID.split('_')[2] + ")";
-    document.getElementById("status").style.color = "green";
-    
-    // Đăng ký nhận dữ liệu từ các Topic
+    console.log("Kết nối thành công! ID: " + CLIENT_ID);
+    const statusEl = document.getElementById("status");
+    statusEl.innerText = "Trạng thái: Đã kết nối hệ thống";
+    statusEl.className = "status-connected";
+
+    // Đăng ký nhận dữ liệu
     client.subscribe("smart_home/temp");
     client.subscribe("smart_home/humi");
 }
 
 function onFail(error) {
     console.log("Kết nối thất bại: " + error.errorMessage);
-    document.getElementById("status").innerText = "Lỗi: " + error.errorMessage;
+    document.getElementById("status").innerText = "Lỗi kết nối: " + error.errorMessage;
+    document.getElementById("status").className = "status-disconnected";
 }
 
-// 5. Hàm gửi lệnh điều khiển (QoS 0 để phản hồi nhanh nhất)
+// 4. Hàm gửi lệnh
 function publishCmd(status) {
+    try {
+        let message = new Paho.MQTT.Message(status);
+        message.destinationName = "smart_home/light";
+        message.qos = 0;
+        client.send(message);
+        console.log("Đã gửi lệnh: " + status);
+    } catch (e) {
+        alert("Chưa kết nối được hệ thống, vui lòng chờ!");
+    }
+}

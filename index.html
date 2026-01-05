@@ -2,22 +2,27 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Home MQTT Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 </head>
 <body>
     <div class="container">
-        <h1>🏠 MQTT Smart Home</h1>
-        <div id="status">Trạng thái: Đang kết nối...</div>
+        <header>
+            <h1>🏠 Smart Home System</h1>
+            <div id="status" class="status-connecting">Đang kết nối tới hệ thống...</div>
+        </header>
         
         <div class="grid-layout">
             <div class="card" id="temp-card">
                 <h3>NHIỆT ĐỘ</h3>
+                <div class="icon">🌡️</div>
                 <div class="value"><span id="temp-value">--</span>°C</div>
             </div>
-            <div class="card">
+            <div class="card" id="humi-card">
                 <h3>ĐỘ ẨM</h3>
+                <div class="icon">💧</div>
                 <div class="value"><span id="humi-value">--</span>%</div>
             </div>
         </div>
@@ -25,8 +30,11 @@
         <div class="grid-layout">
             <div class="card">
                 <h3>Đèn Trần</h3>
-                <button class="btn btn-on" onclick="publishCmd('BẬT')">BẬT</button>
-                <button class="btn btn-off" onclick="publishCmd('TẮT')">TẮT</button>
+                <div class="icon">💡</div>
+                <div class="btn-group">
+                    <button class="btn btn-on" onclick="publishCmd('BẬT')">BẬT</button>
+                    <button class="btn btn-off" onclick="publishCmd('TẮT')">TẮT</button>
+                </div>
             </div>
         </div>
     </div>
