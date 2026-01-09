@@ -2,72 +2,58 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Parking Pro</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Chỗ Đỗ Xe - Smart Parking</title>
+    <link rel="stylesheet" href="customer-style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="glass-container">
-        <header>
-            <div class="logo">PARKING <span>AI</span></div>
-            <div class="header-info">
-                <p>📍 Số 1 Đại Cồ Việt, Hà Nội</p>
-                <p>⏰ 05:00 - 00:00 | 💰 500đ/s</p>
+    <div class="app-container">
+        <header class="customer-header">
+            <div class="status-badge" id="parking-availability">
+                <span class="dot"></span> ĐANG CẬP NHẬT...
             </div>
+            <h1>Bãi Xe Số 1 Đại Cồ Việt</h1>
+            <p class="sub-address">Hai Bà Trưng, Hà Nội</p>
         </header>
 
-        <div class="main-grid">
-            <div class="panel slots-panel">
-                <h2 class="panel-title">TRẠNG THÁI BÃI ĐỖ</h2>
-                <div class="parking-area">
-                    <div id="slot-0" class="slot-card available">
-                        <div class="slot-id">VỊ TRÍ 01</div>
-                        <div class="status-indicator"></div>
-                        <div class="label">TRỐNG</div>
-                    </div>
-                    <div id="slot-1" class="slot-card available">
-                        <div class="slot-id">VỊ TRÍ 02</div>
-                        <div class="status-indicator"></div>
-                        <div class="label">TRỐNG</div>
-                    </div>
-                    <div id="slot-2" class="slot-card available">
-                        <div class="slot-id">VỊ TRÍ 03</div>
-                        <div class="status-indicator"></div>
-                        <div class="label">TRỐNG</div>
-                    </div>
-                </div>
+        <section class="info-grid">
+            <div class="info-card highlight">
+                <span class="icon">🚗</span>
+                <div class="val" id="free-count">--</div>
+                <div class="lbl">Chỗ Trống</div>
             </div>
+            <div class="info-card">
+                <span class="icon">💰</span>
+                <div class="val">500đ</div>
+                <div class="lbl">Mỗi giây</div>
+            </div>
+            <div class="info-card">
+                <span class="icon">🕒</span>
+                <div class="val">05:00</div>
+                <div class="lbl">Mở cửa</div>
+            </div>
+        </section>
 
-            <div class="panel control-panel">
-                <h2 class="panel-title">HỆ THỐNG CỔNG</h2>
-                <div class="gate-controls">
-                    <button onclick="publishControl('OPEN_IN')" class="gate-btn in">MỞ CỔNG VÀO</button>
-                    <button onclick="publishControl('OPEN_OUT')" class="gate-btn out">MỞ CỔNG RA</button>
-                    <button onclick="publishControl('RESET')" class="gate-btn reset">RESET</button>
-                </div>
-                <div class="system-status">
-                    <p>Kết nối: <span id="mqtt-status" class="status-off">Đang ngắt...</span></p>
-                </div>
+        <section class="map-section">
+            <div id="map"></div>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=21.0105,105.8490" target="_blank" class="btn-direction">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" width="20"> CHỈ ĐƯỜNG NGAY
             </div>
+        </section>
 
-            <div class="panel history-panel">
-                <h2 class="panel-title">GIAO DỊCH GẦN ĐÂY</h2>
-                <div class="table-scroll">
-                    <table id="history-table">
-                        <thead>
-                            <tr>
-                                <th>BIỂN SỐ/ID</th>
-                                <th>THỜI GIAN</th>
-                                <th>THÀNH TIỀN</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <footer class="service-info">
+            <h3>Quy định bãi xe</h3>
+            <ul>
+                <li>Vui lòng tắt máy khi đã vào vị trí.</li>
+                <li>Ghi nhớ ID (1111, 2222, 3333) để thanh toán.</li>
+                <li>Liên hệ hỗ trợ: 0123-456-789</li>
+            </ul>
+        </footer>
     </div>
-    <script src="script.js"></script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="customer-script.js"></script>
 </body>
 </html>
