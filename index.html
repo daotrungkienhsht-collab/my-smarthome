@@ -2,38 +2,68 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home MQTT Dashboard</title>
+    <title>Smart Parking Pro</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="glass-container">
         <header>
-            <h1>🏠 Smart Home System</h1>
-            <div id="status" class="status-connecting">Đang kết nối tới hệ thống...</div>
+            <div class="logo">PARKING <span>AI</span></div>
+            <div class="header-info">
+                <p>📍 Số 1 Đại Cồ Việt, Hà Nội</p>
+                <p>⏰ 05:00 - 00:00 | 💰 500đ/s</p>
+            </div>
         </header>
-        
-        <div class="grid-layout">
-            <div class="card" id="temp-card">
-                <h3>NHIỆT ĐỘ</h3>
-                <div class="icon">🌡️</div>
-                <div class="value"><span id="temp-value">--</span>°C</div>
-            </div>
-            <div class="card" id="humi-card">
-                <h3>ĐỘ ẨM</h3>
-                <div class="icon">💧</div>
-                <div class="value"><span id="humi-value">--</span>%</div>
-            </div>
-        </div>
 
-        <div class="grid-layout">
-            <div class="card">
-                <h3>Đèn Trần</h3>
-                <div class="icon">💡</div>
-                <div class="btn-group">
-                    <button class="btn btn-on" onclick="publishCmd('BẬT')">BẬT</button>
-                    <button class="btn btn-off" onclick="publishCmd('TẮT')">TẮT</button>
+        <div class="main-grid">
+            <div class="panel slots-panel">
+                <h2 class="panel-title">TRẠNG THÁI BÃI ĐỖ</h2>
+                <div class="parking-area">
+                    <div id="slot-0" class="slot-card available">
+                        <div class="slot-id">VỊ TRÍ 01</div>
+                        <div class="status-indicator"></div>
+                        <div class="label">TRỐNG</div>
+                    </div>
+                    <div id="slot-1" class="slot-card available">
+                        <div class="slot-id">VỊ TRÍ 02</div>
+                        <div class="status-indicator"></div>
+                        <div class="label">TRỐNG</div>
+                    </div>
+                    <div id="slot-2" class="slot-card available">
+                        <div class="slot-id">VỊ TRÍ 03</div>
+                        <div class="status-indicator"></div>
+                        <div class="label">TRỐNG</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel control-panel">
+                <h2 class="panel-title">HỆ THỐNG CỔNG</h2>
+                <div class="gate-controls">
+                    <button onclick="publishControl('OPEN_IN')" class="gate-btn in">MỞ CỔNG VÀO</button>
+                    <button onclick="publishControl('OPEN_OUT')" class="gate-btn out">MỞ CỔNG RA</button>
+                    <button onclick="publishControl('RESET')" class="gate-btn reset">RESET</button>
+                </div>
+                <div class="system-status">
+                    <p>Kết nối: <span id="mqtt-status" class="status-off">Đang ngắt...</span></p>
+                </div>
+            </div>
+
+            <div class="panel history-panel">
+                <h2 class="panel-title">GIAO DỊCH GẦN ĐÂY</h2>
+                <div class="table-scroll">
+                    <table id="history-table">
+                        <thead>
+                            <tr>
+                                <th>BIỂN SỐ/ID</th>
+                                <th>THỜI GIAN</th>
+                                <th>THÀNH TIỀN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
                 </div>
             </div>
         </div>

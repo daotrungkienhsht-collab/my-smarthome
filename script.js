@@ -1,67 +1,50 @@
-// 1. Cấu hình kết nối
-const MQTT_BROKER = "broker.emqx.io";
-const MQTT_PORT = 8084; // Cổng WSS cho HTTPS
-const CLIENT_ID = "web_user_" + Math.random().toString(16).substr(2, 5);
+const client = new Paho.MQTT.Client("broker.emqx.io", 8083, "web_" + Math.random());
 
-// Khởi tạo client
-const client = new Paho.MQTT.Client(MQTT_BROKER, MQTT_PORT, CLIENT_ID);
-
-// 2. Cấu hình các hàm phản hồi
-client.onConnectionLost = (responseObject) => {
-    console.log("Mất kết nối: " + responseObject.errorMessage);
-    const statusEl = document.getElementById("status");
-    statusEl.innerText = "Mất kết nối! Đang thử lại...";
-    statusEl.className = "status-disconnected";
+client.onMessageArrived = (msg) => {
+    if (msg.destinationName === "parking/slots/state") {
+        updateParkingSlots(msg.payloadString);
+    } else if (msg.destinationName === "parking/billing") {
+        updateHistory(msg.payloadString);
+    }
 };
 
-client.onMessageArrived = (message) => {
-    console.log("Topic: " + message.destinationName + " | Data: " + message.payloadString);
+function updateParkingSlots(stateString) {
+    // stateString ví dụ: "101"
+    for (let i = 0; i < stateString.length; i++) {
+        const slot = document.getElementById(`slot-${i}`);
+        if (!slot) continue;
+        
+        const isAvailable = stateString[i] === "1";
+        if (isAvailable) {
+            slot.className = "slot-card available";
+            slot.querySelector(".label").innerText = "TRỐNG";
+        } else {
+            slot.className = "slot-card occupied";
+            slot.querySelector(".label").innerText = "CÓ XE";
+        }
+    }
+}
+
+function updateHistory(data) {
+    const tbody = document.getElementById("history-body");
+    const row = tbody.insertRow(0);
+    const parts = data.split(" "); // ID:1111 Time:10s Fee:5000
     
-    if (message.destinationName === "smart_home/temp") {
-        document.getElementById("temp-value").innerText = message.payloadString;
-    } else if (message.destinationName === "smart_home/humi") {
-        document.getElementById("humi-value").innerText = message.payloadString;
-    }
-};
-
-// 3. Tiến hành kết nối
-const connectOptions = {
-    onSuccess: onConnect,
-    onFailure: onFail,
-    useSSL: true, // Bắt buộc true khi chạy trên GitHub Pages
-    timeout: 3,
-    keepAliveInterval: 30
-};
-
-console.log("Đang khởi tạo kết nối MQTT...");
-client.connect(connectOptions);
-
-function onConnect() {
-    console.log("Kết nối thành công! ID: " + CLIENT_ID);
-    const statusEl = document.getElementById("status");
-    statusEl.innerText = "Trạng thái: Đã kết nối hệ thống";
-    statusEl.className = "status-connected";
-
-    // Đăng ký nhận dữ liệu
-    client.subscribe("smart_home/temp");
-    client.subscribe("smart_home/humi");
+    row.insertCell(0).innerText = parts[0].split(":")[1];
+    row.insertCell(1).innerText = parts[1].split(":")[1];
+    row.insertCell(2).innerHTML = `<b style="color:#38bdf8">${parts[2].split(":")[1]} VNĐ</b>`;
 }
 
-function onFail(error) {
-    console.log("Kết nối thất bại: " + error.errorMessage);
-    document.getElementById("status").innerText = "Lỗi kết nối: " + error.errorMessage;
-    document.getElementById("status").className = "status-disconnected";
-}
+// Giữ các hàm connect và publishControl như cũ...
+client.connect({ onSuccess: () => {
+    document.getElementById("mqtt-status").innerText = "Đã kết nối";
+    document.getElementById("mqtt-status").className = "status-on";
+    client.subscribe("parking/slots/state");
+    client.subscribe("parking/billing");
+}});
 
-// 4. Hàm gửi lệnh
-function publishCmd(status) {
-    try {
-        let message = new Paho.MQTT.Message(status);
-        message.destinationName = "smart_home/light";
-        message.qos = 0;
-        client.send(message);
-        console.log("Đã gửi lệnh: " + status);
-    } catch (e) {
-        alert("Chưa kết nối được hệ thống, vui lòng chờ!");
-    }
+function publishControl(cmd) {
+    const message = new Paho.MQTT.Message(cmd);
+    message.destinationName = "parking/control";
+    client.send(message);
 }
