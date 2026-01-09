@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Chỗ Đỗ Xe - Smart Parking</title>
+    <link rel="stylesheet" href="customer-style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="customer-header">
+            <div class="status-badge" id="parking-availability">
+                <span class="dot"></span> ĐANG CẬP NHẬT...
+            </div>
+            <h1>Bãi Xe Số 1 Đại Cồ Việt</h1>
+            <p class="sub-address">Hai Bà Trưng, Hà Nội</p>
+        </header>
+
+        <section class="info-grid">
+            <div class="info-card highlight">
+                <span class="icon">🚗</span>
+                <div class="val" id="free-count">--</div>
+                <div class="lbl">Chỗ Trống</div>
+            </div>
+            <div class="info-card">
+                <span class="icon">💰</span>
+                <div class="val">500đ</div>
+                <div class="lbl">Mỗi giây</div>
+            </div>
+            <div class="info-card">
+                <span class="icon">🕒</span>
+                <div class="val">05:00</div>
+                <div class="lbl">Mở cửa</div>
+            </div>
+        </section>
+
+        <section class="map-section">
+            <div id="map"></div>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=21.0105,105.8490" target="_blank" class="btn-direction">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" width="20"> CHỈ ĐƯỜNG NGAY
+            </div>
+        </section>
+
+        <footer class="service-info">
+            <h3>Quy định bãi xe</h3>
+            <ul>
+                <li>Vui lòng tắt máy khi đã vào vị trí.</li>
+                <li>Ghi nhớ ID (1111, 2222, 3333) để thanh toán.</li>
+                <li>Liên hệ hỗ trợ: 0123-456-789</li>
+            </ul>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="customer-script.js"></script>
+</body>
+</html>
