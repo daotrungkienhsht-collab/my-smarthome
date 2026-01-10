@@ -1,50 +1,55 @@
-const client = new Paho.MQTT.Client("broker.emqx.io", 8083, "web_" + Math.random());
+const BROKER = "broker.emqx.io";
+const PORT = 8083;
+const CLIENT_ID = "mob_park_" + Math.random().toString(16).substr(2, 4);
+
+const client = new Paho.MQTT.Client(BROKER, PORT, CLIENT_ID);
+
+client.onConnectionLost = () => {
+    document.getElementById("status-dot").className = "status-dot offline";
+    setTimeout(startConnect, 3000);
+};
 
 client.onMessageArrived = (msg) => {
     if (msg.destinationName === "parking/slots/state") {
-        updateParkingSlots(msg.payloadString);
-    } else if (msg.destinationName === "parking/billing") {
-        updateHistory(msg.payloadString);
+        renderSlots(msg.payloadString);
     }
 };
 
-function updateParkingSlots(stateString) {
-    // stateString ví dụ: "101"
-    for (let i = 0; i < stateString.length; i++) {
-        const slot = document.getElementById(`slot-${i}`);
-        if (!slot) continue;
+function startConnect() {
+    client.connect({
+        onSuccess: () => {
+            document.getElementById("status-dot").className = "status-dot online";
+            client.subscribe("parking/slots/state");
+        },
+        useSSL: false
+    });
+}
+
+function renderSlots(state) {
+    // state ví dụ: "000" là đầy, "111" là trống hết
+    let occupiedCount = 0;
+    
+    for (let i = 0; i < state.length; i++) {
+        const slotEl = document.getElementById(`slot-${i}`);
+        const isAvailable = state[i] === "1";
         
-        const isAvailable = stateString[i] === "1";
         if (isAvailable) {
-            slot.className = "slot-card available";
-            slot.querySelector(".label").innerText = "TRỐNG";
+            slotEl.className = "slot-item available";
+            slotEl.querySelector(".slot-status").innerText = "Chỗ trống";
         } else {
-            slot.className = "slot-card occupied";
-            slot.querySelector(".label").innerText = "CÓ XE";
+            slotEl.className = "slot-item occupied";
+            slotEl.querySelector(".slot-status").innerText = "Đã có xe";
+            occupiedCount++;
         }
+    }
+
+    // Kiểm tra nếu đầy cả 3 slot (state.length = 3)
+    const notice = document.getElementById("full-notice");
+    if (occupiedCount === state.length) {
+        notice.style.display = "flex";
+    } else {
+        notice.style.display = "none";
     }
 }
 
-function updateHistory(data) {
-    const tbody = document.getElementById("history-body");
-    const row = tbody.insertRow(0);
-    const parts = data.split(" "); // ID:1111 Time:10s Fee:5000
-    
-    row.insertCell(0).innerText = parts[0].split(":")[1];
-    row.insertCell(1).innerText = parts[1].split(":")[1];
-    row.insertCell(2).innerHTML = `<b style="color:#38bdf8">${parts[2].split(":")[1]} VNĐ</b>`;
-}
-
-// Giữ các hàm connect và publishControl như cũ...
-client.connect({ onSuccess: () => {
-    document.getElementById("mqtt-status").innerText = "Đã kết nối";
-    document.getElementById("mqtt-status").className = "status-on";
-    client.subscribe("parking/slots/state");
-    client.subscribe("parking/billing");
-}});
-
-function publishControl(cmd) {
-    const message = new Paho.MQTT.Message(cmd);
-    message.destinationName = "parking/control";
-    client.send(message);
-}
+startConnect();
